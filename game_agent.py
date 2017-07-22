@@ -237,7 +237,7 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # simply return the score when we reach the last depth
+        # Simply return the score when we reach the last depth
         if depth == 0:
             return self.score(game, self)
 
@@ -262,7 +262,7 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # simply return the score when we reach the last depth
+        # Simply return the score when we reach the last depth
         if depth == 0:
             return self.score(game, self)
 
@@ -322,8 +322,26 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Initialize the best move so that this function returns something
+        # in case the search fails due to timeout
+        best_move = (-1, -1)
+
+        # We start at depth=1, and go deeper in each iteration of the loop below
+        depth = 1
+
+        # The try/except block will automatically catch the exception
+        # raised when the timer is about to expire.
+        try:
+            # Loop as long as we can (until we run out of time)
+            while True:
+                best_move = self.alphabeta(game, depth)
+                depth += 1
+
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -373,5 +391,79 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Get the possible moves
+        legal_moves = game.get_legal_moves()
+
+        # Keep track of the best move discovered so far.
+        best_move = (-1, -1)
+        best_score = float('-inf')
+
+        # Loop through all the available moves and determine the best one
+        for move in legal_moves:
+            # Calculate the score for the move
+            clone = game.forecast_move(move)
+            score = self.min_value(clone, depth - 1, alpha, beta)
+
+            # Determine if this move is better than prior moves
+            if score > best_score:
+                best_move = move
+                best_score = score
+
+        # Return the best move
+        return best_move
+
+    def min_value(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        # Simply return the score when we reach the last depth
+        if depth == 0:
+            return self.score(game, self)
+
+        # Get the possible moves
+        legal_moves = game.get_legal_moves()
+
+        # Make sure there is at least one possible move
+        if not legal_moves:
+            return game.utility(self)
+
+        # Loop through all the available moves and determine the best one
+        score = float("inf")
+        for move in legal_moves:
+            # Calculate the score for the move
+            clone = game.forecast_move(move)
+            score = min(score, self.max_value(clone, depth - 1, alpha, beta))
+            if score <= alpha:
+                return score
+            beta = min(beta, score)
+
+        # Return the score
+        return score
+
+    def max_value(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        # Simply return the score when we reach the last depth
+        if depth == 0:
+            return self.score(game, self)
+
+        # Get the possible moves
+        legal_moves = game.get_legal_moves()
+
+        # Make sure there is at least one possible move
+        if not legal_moves:
+            return game.utility(self)
+
+        # Loop through all the available moves and determine the best one
+        score = float("-inf")
+        for move in legal_moves:
+            # Calculate the score for the move
+            clone = game.forecast_move(move)
+            score = max(score, self.min_value(clone, depth - 1, alpha, beta))
+            if score >= beta:
+                return score
+            alpha = max(alpha, score)
+
+        # Return the score
+        return score
