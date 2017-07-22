@@ -212,8 +212,76 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # Get the possible moves
+        legal_moves = game.get_legal_moves()
+
+        # Keep track of the best move discovered so far.
+        best_move = (-1, -1)
+        best_score = float('-inf')
+
+        # Loop through all the available moves and determine the best one
+        for move in legal_moves:
+            # Calculate the score for the move
+            clone = game.forecast_move(move)
+            score = self.min_value(clone, depth - 1)
+
+            # Determine if this move is better than prior moves
+            if score > best_score:
+                best_move = move
+                best_score = score
+
+        # Return the best move
+        return best_move
+
+    def min_value(self, game, depth):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        # simply return the score when we reach the last depth
+        if depth == 0:
+            return self.score(game, self)
+
+        # Get the possible moves
+        legal_moves = game.get_legal_moves()
+
+        # Make sure there is at least one possible move
+        if not legal_moves:
+            return game.utility(self)
+
+        # Loop through all the available moves and determine the best one
+        score = float("inf")
+        for move in legal_moves:
+            # Calculate the score for the move
+            clone = game.forecast_move(move)
+            score = min(score, self.max_value(clone, depth - 1))
+
+        # Return the score
+        return score
+
+    def max_value(self, game, depth):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        # simply return the score when we reach the last depth
+        if depth == 0:
+            return self.score(game, self)
+
+        # Get the possible moves
+        legal_moves = game.get_legal_moves()
+
+        # Make sure there is at least one possible move
+        if not legal_moves:
+            return game.utility(self)
+
+        # Loop through all the available moves and determine the best one
+        score = float("-inf")
+        for move in legal_moves:
+            # Calculate the score for the move
+            clone = game.forecast_move(move)
+            score = max(score, self.min_value(clone, depth - 1))
+
+        # Return the score
+        return score
 
 
 class AlphaBetaPlayer(IsolationPlayer):
