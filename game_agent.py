@@ -426,6 +426,11 @@ class AlphaBetaPlayer(IsolationPlayer):
             clone = game.forecast_move(move)
             score = self.min_value(clone, depth - 1, alpha, beta)
 
+            # Pruning to prevent expanding too many nodes
+            if score >= beta:
+                return move
+            alpha = max(alpha, score)
+
             # Determine if this move is better than prior moves
             if score > best_score:
                 best_move = move
