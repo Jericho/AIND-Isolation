@@ -108,8 +108,15 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    # Very simple heuristic: number my moves
-    return float(len(game.get_legal_moves(player)))
+    # Heuristic: ratio of my moves over opponent's moves'
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    # Failsafe to prevent division by zero
+    if opp_moves == 0:
+        return float("inf")
+
+    return float(own_moves) / float(opp_moves)
 
 
 class IsolationPlayer:
